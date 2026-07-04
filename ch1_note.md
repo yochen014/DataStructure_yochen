@@ -235,7 +235,7 @@ int main() {
 > [!TIP]
 > 當你進行以下三種操作時，編譯器會自動呼叫複製建構子：
 > 
-> * 明確宣告複製： Complex z2 = z1; 或 Complex z2(z1);
+> * 明確宣告複製： `Complex z2 = z1`; 或 `Complex z2(z1)`;
 > 
 > * 函式的傳值呼叫（Pass by Value）： 將物件當作參數傳入函式時。
 > 
@@ -250,7 +250,92 @@ int main() {
 > [!CAUTION]
 > **複製建構子的參數必須是該類別的常數參考（const ClassName&）**
 
-
 否則...如果參數是傳值（ClassName other），那麼在呼叫複製建構子、把來源物件傳進去時，系統為了「複製參數」，又會再呼叫一次複製建構子，然後為了傳遞那個參數，又再呼叫一次……這會造成無限遞迴（Infinite Recursion）。因此，必須使用參考來直接存取來源物件，避免產生額外的複製行為。
 
+```cpp
+class MathVector {
+private:
+    int* data;
+    int size;
+
+public:
+    // 1. 一般建構子
+    MathVector(int n) {
+        size = n;
+        data = new int[size];
+        for(int i = 0; i < size; i++) data[i] = 0;
+        cout << "一般建構子：配置了大小為 " << size << " 的記憶體\n";
+    }
+    // 2. 複製建構子 (深拷貝實作)
+    MathVector(const MathVector& other) {
+        size = other.size;
+        // 核心步驟：向系統要一塊『全新的』記憶體
+        data = new int[size]; 
+        
+        // 將來源物件的值，一個一個複製到新記憶體中
+        for(int i = 0; i < size; i++) {
+            data[i] = other.data[i];
+        }
+        cout << "複製建構子：執行深拷貝，並配置新記憶體\n";
+    }
+```
+
+<details><summary>Example: 複製一份Array</summary>
+
+```cpp
+int main() {
+    cout << "--- 建立 V1 ---\n";
+    MathVector V1(5);
+    V1.setFirstElement(99);
+
+    cout << "\n--- 建立 V2 (觸發複製建構子) ---\n";
+    MathVector V2 = V1; 
+
+    cout << "\n--- 獨立性測試 ---\n";
+    V2.setFirstElement(888); // 修改 V2 的內容
+
+    cout << "V1 ";
+    V1.printFirstElement(); // 若為淺拷貝，V1 也會變成 888。因為是深拷貝，「V1 依然是 99」。
+    
+    cout << "V2 ";
+    V2.printFirstElement(); // 888
+
+    cout << "\n--- 程式結束，準備呼叫解構子 ---\n";
+    return 0;
+}
+```
+</details>
+
 ### Inheritance(繼承)
+<font color='yellow'>**語法規則**</font><br>
+定義新類別時，使用冒號 : 來指明它繼承自哪一個基礎類別
+
+```cpp
+class Circle : public Shape { 
+    // ...
+};
+```
+上述例子，Circle為**子類別**，Shape為**父類別**。
+
+---
+
+### Virtual(虛擬)
+用來實現「多型 (Polymorphism)」的關鍵字。它的核心機制是開啟執行期分派 (Runtime Dispatch)。
+> [!NOTE]
+> 在沒有 virtual 的情況下，編譯器會在編譯階段就決定好要呼叫哪個函數。
+> 
+> 但如果在基礎類別的函數前加上 virtual，你就是在告訴編譯器：「請在程式執行時，根據物件實際的型別來決定要呼叫哪一個函數版本，而不是根據指標的型別來決定。」
+
+```cpp
+class Shape {
+    public:
+        virtual double area() const = 0; //建立計算面積「虛擬函數」
+
+        virtual ~Shape() = default; //虛擬建構子
+}
+```
+```cpp
+virtual ~Shape() {}; //舊版cpp 的虛擬建構子
+```
+> [!TIP]
+> 註解：`virtual` 允許子類別override這個函數；`const`承諾此函數`area()`不修改物件內部變數。；`=0`為「純虛擬函數」之註記，代表父類別不實作。
