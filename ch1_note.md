@@ -45,7 +45,7 @@ public:
 * 絕對沒有回傳值（連 void 都不用寫）。
 
 * 在物件建立時*自動觸發*，無法手動像一般函式那樣呼叫。
-
+---
 在嚴謹的程式設計中，未定義的行為（Undefined Behavior） 是最致命的錯誤之一。
 
 如果沒有建構子，當你在記憶體中宣告一個變數時，它會繼承該記憶體區塊殘留的「垃圾值」。建構子確保了每一個物件從誕生的那一刻起，都處於一個合法且可預期的初始狀態，這就像是在進行數學證明前，必須先嚴格定義好所有初始變數的值與範圍一樣。
@@ -92,4 +92,71 @@ int main() {
 }
 ```
 註解：Complex z1會因為預設建構子獲得初始值 $0+0i$，而z2會直接傳入參數得到值。
+</details>
+
+### Destructor(解構子)
+解構子是一個特殊的成員函式，它會在物件的生命週期結束（例如離開所在的程式區塊，或是被手動刪除）時自動被呼叫。它的唯一目的是釋放物件在存活期間佔用的外部資源。<br>
+解構子有三個非常嚴格的限制：
+* 名稱是波浪號 ~ 加上類別名稱。
+
+* 絕對沒有回傳值。
+
+* 絕對沒有參數。這意味著一個類別只能有一個解構子，不能像建構子那樣進行多載（Overload）。
+---
+
+如果你建立的物件只包含簡單的數值（例如複數的 double real, imag），解構子其實**不是必須**的，編譯器預設的清理機制就足夠了。
+
+但假設你正在設計一個用來進行數值分析的 $n$ 維向量類別。這個向量的大小 $n$ 是在執行時期決定的，因此你必須向系統動態借用一塊記憶體（使用 new）。
+
+當這個物件消滅時，它內部指向那塊記憶體的**指標雖然不見了，但那塊記憶體本身並不會自動歸還給系統**。如果不處理，就會造成「記憶體洩漏（Memory Leak）」，程式跑久了就會把系統記憶體吃光並崩潰。
+
+由Constructor獲取資源、在Destructor釋放資源的設計模式稱為
+<font color="yellow">**RAII(Resource Acquisition Is Initialization)**</font>。
+
+<details><summary>Example: n 維向量class</summary>
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class MathVector{
+private:
+    int* data; //指向動態陣列的指標
+    int size;
+public:
+    MathVector(int n) { //建構子，物件誕生時動態配置記憶體
+        size = n;
+        data = new int[size] //向系統要一塊連續的記憶體
+        cout << "建構子：配置大小為" << size << "的陣列空間\n";
+    }
+    //解構子，消滅物件前釋放記憶體
+    ~MathVector() {
+        delete[] data; //把借來的記憶體還給系統 (一個陣列)
+    }
+    // 一個簡單的操作函式(不重要)
+    void setZero() {
+        for(int i = 0; i < size; i++) {
+            data[i] = 0;
+        }
+        std::cout << "已將向量初始化為零向量\n";
+    }
+ 
+};
+
+void doMath() {
+    cout << "進入domath\n";
+
+    MathVector v(5); //建立一個5維向量；自動呼叫建構子
+    v.setzero();
+    cout << "準備離開domath\n";
+    //此時代表 v 的生命走到盡頭，解構子 ~Mathvector() 會被呼叫
+}
+
+int main() {
+    cout << "程式開始\n";
+    doMath();
+    cout << "程式結束\n";
+    return 0;
+}
+```
 </details>
