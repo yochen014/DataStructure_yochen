@@ -91,7 +91,7 @@ public:
 }
 ```
 ### Member(資料成員、成員函式)
-C++類別成員主要分為資料成員（變數）與成員函式（方法）。資料成員用來儲存物件的狀態，而成員函式定義了物件的行為。兩者皆可依需求宣告為public（公開）或private（私有），藉此實現物件導向的**封裝**特性。
+C++類別成員主要分為資料成員（變數）與成員函式（方法）。資料成員用來儲存物件的狀態，而成員函式定義了物件的行為。兩者皆可依需求宣告為public（公開）或private（私有），藉此實現物件導向的**封裝(Encapsulation)**特性。
 
 ### 成員變數(Member Variable)
 * **獨立性**：修改物件 A 的成員變數，絕對不會影響到物件 B。
@@ -407,3 +407,33 @@ virtual ~Shape() {}; //舊版cpp 的虛擬建構子
 > [!TIP]
 > 註解：`virtual` 允許子類別覆寫(override)這個函數；`const`承諾此函數`area()`不修改物件內部變數。；`=0`為「純虛擬函數」之註記，代表父類別不實作。
 > 若只有`constant`、沒有`=0`，則就要在父類別(以Shape為例)實作
+
+### 多型(Polymorphism)
+* Compile-time Polymorphism（編譯期多型）<br>
+在編譯期多型中，編譯器會根據上下文來決定函數或運算子的行為方式。這種類型的多型是透過函數多載（function overloading）或運算子多載（operator overloading）來實現的。
+
+* Run-time Polymorphism（執行期多型）<br>
+    與編譯期多型不同，執行期多型中的函數呼叫是在執行期間才被解析，而非在編譯期間由編譯器決定綁定哪一個函數呼叫。<br>
+    執行期多型是透過使用虛擬函數（virtual functions）來進行函數覆寫（function overriding）實現的。
+    例如：
+    ```cpp
+    class Shape {
+        public:
+            virtual double area() const = 0; //建立計算面積「虛擬函數」
+            virtual ~Shape() = default; //虛擬建構子
+    }
+    
+    class Circle : public Shape {
+    public:
+        Circle(double r) r_(r) {}
+        double area() const override {return 3.14159 * r_ * r_;} //const代表此函數不改變物件成員變數
+    private:
+        double r_;
+    };
+    int main(){
+        Circle c(3.0);
+        Square q(4.0);
+        cout << c.area(); //多型
+        cout << q.area(); //多型
+    }
+    ```
