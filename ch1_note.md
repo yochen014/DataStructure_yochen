@@ -317,6 +317,18 @@ class Circle : public Shape {
 ```
 上述例子，Circle為**子類別**，Shape為**父類別**。
 
+### 覆寫(Override)
+使用`override`告訴系統這是繼承父類別。不寫`override`程式仍然可動但**危險**
+```cpp
+class Circle : public Shape {
+    public:
+        Circle(double r) r_(r) {}
+        double area() const override {return 3.14159 * r_ * r_;} //const代表此函數不改變物件成員變數
+    private:
+        double r_;
+};
+```
+
 ---
 
 ### Virtual(虛擬)
@@ -338,4 +350,4 @@ class Shape {
 virtual ~Shape() {}; //舊版cpp 的虛擬建構子
 ```
 > [!TIP]
-> 註解：`virtual` 允許子類別override這個函數；`const`承諾此函數`area()`不修改物件內部變數。；`=0`為「純虛擬函數」之註記，代表父類別不實作。
+> 註解：`virtual` 允許子類別覆寫(override)這個函數；`const`承諾此函數`area()`不修改物件內部變數。；`=0`為「純虛擬函數」之註記，代表父類別不實作。
