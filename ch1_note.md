@@ -90,6 +90,59 @@ public:
     int value() const {return count_;}
 }
 ```
+### Member(資料成員、成員函式)
+C++類別成員主要分為資料成員（變數）與成員函式（方法）。資料成員用來儲存物件的狀態，而成員函式定義了物件的行為。兩者皆可依需求宣告為public（公開）或private（私有），藉此實現物件導向的**封裝**特性。
+
+### 成員變數(Member Variable)
+* **獨立性**：修改物件 A 的成員變數，絕對不會影響到物件 B。
+* **全域性**：class內的所有成員函式皆可看見、**修改**這些成員變數。
+### 成員函式(Member Function)
+
+### 靜態變數(Static Variable)
+屬於整個類別，所有物件共享這一份資料。用`static`開頭。
+```cpp
+class Matrix {
+private:
+    // 【一般成員變數 (實體變數)】
+    // 每個矩陣物件都有自己獨立的 rows 和 cols
+    int rows;
+    int cols;
+
+public:
+    // 【靜態變數 (Static Variable)】
+    // 屬於整個 Matrix 類別，所有物件共享這一份資料
+    // 用來記錄「總共創造了多少個矩陣」
+    static int totalCount; 
+
+    // 建構子
+    Matrix(int r, int c) : rows(r), cols(c) {
+        // 每當一個新物件誕生，就讓全域計數器 +1
+        totalCount++; 
+    }
+
+    // 解構子
+    ~Matrix() {
+        totalCount--; // 物件消滅時計數器 -1
+    }
+
+    // 【成員函式】：計算總元素個數
+    int getElementCount() const {
+        // area 是一個【區域變數】
+        // 它只在這個函式執行的瞬間存在，算完就消失了
+        int area = rows * cols; 
+        return area;
+    }
+    
+    // 【成員函式】：印出目前狀態
+    void printInfo() const {
+        cout << "這個矩陣是 " << rows << "x" << cols << "\n";
+    }
+};
+
+// 【重要語法】靜態變數必須在類別的「外部」進行真正的記憶體分配與初始化
+int Matrix::totalCount = 0;
+```
+
 ### Constructor(建構子)
 當你根據 class 的藍圖建立一個具體的「物件」（Object）時，編譯器會自動呼叫一個特殊的成員函式，這就是 **Constructor**。它的唯一目的是初始化物件的狀態。<br>
 > [!IMPORTANT]
