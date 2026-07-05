@@ -306,6 +306,8 @@ int main() {
 ```
 </details>
 
+---
+
 ### Inheritance(繼承)
 <font color='yellow'>**語法規則**</font><br>
 定義新類別時，使用冒號 : 來指明它繼承自哪一個基礎類別
@@ -351,3 +353,4 @@ virtual ~Shape() {}; //舊版cpp 的虛擬建構子
 ```
 > [!TIP]
 > 註解：`virtual` 允許子類別覆寫(override)這個函數；`const`承諾此函數`area()`不修改物件內部變數。；`=0`為「純虛擬函數」之註記，代表父類別不實作。
+> 若只有`constant`、沒有`=0`，則就要在父類別(以Shape為例)實作
