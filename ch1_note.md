@@ -440,7 +440,7 @@ virtual ~Shape() {}; //舊版cpp 的虛擬建構子
 
 * Run-time Polymorphism（執行期多型）<br>
     與編譯期多型不同，執行期多型中的函數呼叫是在執行期間才被解析，而非在編譯期間由編譯器決定綁定哪一個函數呼叫。<br>
-    執行期多型是透過使用虛擬函數（virtual functions）來進行函數覆寫（function overriding）實現的。
+    執行期多型是透過使用虛擬函數（virtual functions）來進行函數覆寫（function overriding）實現的。伴隨著虛擬函數表 (vtable) 的指標查詢成本。
     例如：
     ```cpp
     class Shape {
