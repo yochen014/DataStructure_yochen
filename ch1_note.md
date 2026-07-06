@@ -360,6 +360,22 @@ int main() {
 </details>
 
 ---
+### Encapsulation(封裝)
+```cpp
+class Counter {
+public:
+    Counter() : count_(0) {}      // constructor
+    void   increment()       { ++count_; }
+    void   reset()           { count_ = 0; }
+    int    value() const     { return count_; }
+
+private:
+    int count_;                   // invariant: count_ >= 0
+};
+```
+使用者不能直接修改`count_`，但可以透過public method修改，例如`c.increment()`。
+
+---
 
 ### Inheritance(繼承)
 <font color='yellow'>**語法規則**</font><br>
@@ -409,8 +425,18 @@ virtual ~Shape() {}; //舊版cpp 的虛擬建構子
 > 若只有`constant`、沒有`=0`，則就要在父類別(以Shape為例)實作
 
 ### 多型(Polymorphism)
-* Compile-time Polymorphism（編譯期多型）<br>
-在編譯期多型中，編譯器會根據上下文來決定函數或運算子的行為方式。這種類型的多型是透過函數多載（function overloading）或運算子多載（operator overloading）來實現的。
+* Compile-time / Static Polymorphism（編譯期多型/靜態多型）<br>
+    在編譯期多型中，編譯器會根據上下文來決定函數或運算子的行為方式。這種類型的多型是透過函數多載（function overloading）或運算子多載（operator overloading）來實現的。<br>
+    使用Templates:
+    ```cpp
+    template <typename T>
+    T maximum(T a, T b) {
+        return (a > b) ? a : b;
+    }
+    int    x = maximum(3, 7);             // T = int
+    double y = maximum(2.5, 1.7);         // T = double
+    std::string s = maximum<std::string>("apple", "pear");
+    ```
 
 * Run-time Polymorphism（執行期多型）<br>
     與編譯期多型不同，執行期多型中的函數呼叫是在執行期間才被解析，而非在編譯期間由編譯器決定綁定哪一個函數呼叫。<br>
