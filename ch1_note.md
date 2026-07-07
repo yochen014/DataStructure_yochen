@@ -465,3 +465,70 @@ virtual ~Shape() {}; //舊版cpp 的虛擬建構子
         cout << q.area(); //多型
     }
     ```
+
+* Class Templates(類別模板)
+    `template <typename T>`中的`T`未來被替換成某種型別(可為int, double, string, object...)。
+    ```cpp
+    class Stack {
+    public:
+        void push(const T& x) { data_[++top_] = x; } // T& x為call by reference
+        T pop()               { return data_[top_--]; }
+        bool empty() const    { return top_ == -1; }
+    private:
+        T data_[1000]; //此陣列可裝1000個類別為T的
+        int top_ = -1;
+    };
+    ```
+
+    ```cpp
+    int main() {
+        Stack<int>    si;  // 編譯器生成一個內部全部是 int 的 Stack
+        Stack<string> ss;  // 編譯器生成一個內部全部是 string 的 Stack
+        Stack<Shape*> sp;  // 編譯器生成一個內部全部是指標 Shape* 的 Stack
+        return 0;
+    }
+    ```
+    編譯器會根據你提供的型別，自動展開並生成三份各自獨立的類別程式碼。
+
+* Operator Overloading(運算子多載)
+    像是我們在定義一個新的代數結構與運算方式(例如二維空間)。
+    例如：
+    ```cpp
+    class Vec2 {
+    public:
+        Vec2(double x, double y) : x_(x), y_(y) {} //
+
+        Vec2 operator+(const Vec2& o) const { return {x_+o.x_, y_+o.y_}; }
+        Vec2 operator*(double s)      const { return {x_*s, y_*s}; }
+
+        friend std::ostream& operator<<(std::ostream& os, const Vec2& v) {
+            return os << '(' << v.x_ << ',' << v.y_ << ')';
+        }
+    private:
+        double x_, y_;
+    };
+    ```
+    `Vec2 operator+` 重新定義了加法(就如同向量空間中的加法也要被重新定義一樣)
+
+### Friend function(朋友函數)
+今天一個 function 若宣告為 friend 是告訴來引用此類別的人說，我們提供一個公開的方法(規格)，且能夠讓你去存取 private member。但要做什麼，需要你自己來實作。
+必須**call by reference**。
+如上面例子：
+```cpp
+friend ostream& operator<<(ostream& os, const Vec2& v) {
+    return os << '(' << v.x_ << ',' << v.y_ << ')';
+}
+Vec2 a(1, 2), b(3, 4);
+cout << a + b * 2.0;  // (7,10)
+```
+> [!NOTE]
+> 這段語法是用來定義如何將 `Vec2` 列印到終端機（例如 `cout << a;`）
+> 使用`friend`的原因：
+> 如果我們把 `operator<<` 寫成 `Vec2` 的一般成員函數，那麼使用的語法會被迫反過來，變成 `a << cout;`，這完全違背了資料流的直覺。<br>
+> `operator<<`必須定義為一個獨立於類別之外的全域函數（因為左邊的運算元是 `ostream` 而不是 `Vec2`）
+
+> [!TIP]
+> **突破封裝的特權：**
+> 因為它是一個外部函數，理當無法存取 `Vec2` 內部私有的 `x_` 與 `y_`。透過在類別內部宣告 `friend`，`Vec2` 等同於給予這個特定的外部函數「破例存取私有成員」的特權。
+> 
+> 結論：`friend`可**允許外部函數去存取**`private`變數，要謹慎用。
