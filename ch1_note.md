@@ -424,19 +424,20 @@ virtual ~Shape() {}; //舊版cpp 的虛擬建構子
 > 註解：`virtual` 允許子類別覆寫(override)這個函數；`const`承諾此函數`area()`不修改物件內部變數。；`=0`為「純虛擬函數」之註記，代表父類別不實作。
 > 若只有`constant`、沒有`=0`，則就要在父類別(以Shape為例)實作
 
-### 多型(Polymorphism)
-* Compile-time / Static Polymorphism（編譯期多型/靜態多型）<br>
+### 多型(Polymorphism)與模板(Templates)
+* Compile-time / **Static** Polymorphism（編譯期多型/靜態多型）<br>
     在編譯期多型中，編譯器會根據上下文來決定函數或運算子的行為方式。這種類型的多型是透過函數多載（function overloading）或運算子多載（operator overloading）來實現的。<br>
     使用Templates:
     ```cpp
     template <typename T>
     T maximum(T a, T b) {
-        return (a > b) ? a : b;
+        return (a > b) ? a : b; //三元運算子
     }
     int    x = maximum(3, 7);             // T = int
     double y = maximum(2.5, 1.7);         // T = double
-    std::string s = maximum<std::string>("apple", "pear");
+    string s = maximum<string>("apple", "pear"); //顯式指定 (Explicit Specification)
     ```
+    註解：`maximum<string>`用來明顯指定其型別，避免進行`>`判斷時邏輯錯誤。(但不會編譯錯誤)
 
 * Run-time Polymorphism（執行期多型）<br>
     與編譯期多型不同，執行期多型中的函數呼叫是在執行期間才被解析，而非在編譯期間由編譯器決定綁定哪一個函數呼叫。<br>
