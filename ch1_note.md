@@ -532,3 +532,33 @@ cout << a + b * 2.0;  // (7,10)
 > 因為它是一個外部函數，理當無法存取 `Vec2` 內部私有的 `x_` 與 `y_`。透過在類別內部宣告 `friend`，`Vec2` 等同於給予這個特定的外部函數「破例存取私有成員」的特權。
 > 
 > 結論：`friend`可**允許外部函數去存取**`private`變數，要謹慎用。
+>
+### 記憶體管理法則(Zero / Three / Five)
+The Rule of Zero / Three / Five
+
+* **The rule of Zero(零法則)**
+  如果你的類別沒有「直接」管理任何原始資源（例如沒有手動操作指標或 new/delete），那麼你完全不需要撰寫任何特殊的生命週期函數（write nothing），編譯器生成的預設行為就已經是正確的。
+  > [!TIP]
+  > 我們應該極力「偏好使用零法則 (Prefer the Rule of Zero)」。其精神在於將原始資源包裝在標準型別內，把繁瑣的記帳工作完全交接給它們。
+* **The rule of Three(三法則)**
+  只要你的類別需要手動管理一項資源（Manage a resource?），你就必須同時定義這三個函數：**解構子 (destructor)**、**複製建構子 (copy ctor)** 以及**複製賦值運算子 (copy assignment)**。
+  > [!TIP]
+  > 一旦你寫了自訂的解構子來釋放動態記憶體，編譯器預設的「淺拷貝」就會在物件複製時引發記憶體位址重疊，最終導致雙重釋放 (Double Free) 的崩潰。三法則強制你補齊深拷貝 (Deep Copy) 的邏輯，確保每個物件狀態的絕對獨立。
+
+* **The rule of Five(五法則)**
+  在現代 C++ 實務中，如果你因為管理資源而觸發了三法則，你應該進一步補上另外兩個函數：**移動建構子 (move ctor)** 與**移動賦值運算子 (move assignment)**。
+  這兩個機制允許我們利用「資源所有權轉移」來取代昂貴的深拷貝，這能將特定操作的時間複雜度從 $O(n)$ 直接微縮至 $O(1)$，是現代 C++ 達成極致效能的關鍵。
+
+```cpp
+#include <vector>
+#include <string>
+using namespace std;
+
+class Good {
+    // 遵守「零法則」的最佳示範
+    vector<int> data_;  // vector 會自己管理內部動態陣列的生命週期
+    string      name_;  // string 也會自己管理字串記憶體
+    
+    // 複製/移動/銷毀：全部由編譯器自動生成
+};
+```
