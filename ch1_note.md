@@ -619,7 +619,6 @@ STL四大元件：
 #include <map>
 #include <unordered_map>
 #include <string>
-
 using namespace std;
 
 int main() {
@@ -627,6 +626,34 @@ int main() {
     unordered_map<string, int> phone_fast; // 內部是無序的雜湊表結構
     
     phone["Alice"] = 1234;                 // O(log n) 的插入操作
+    return 0;
+}
+```
+
+### Container Adapters(容器轉接器)
+設計模式中，**轉接器模式 (Adapter Pattern)**的核心思想是將一個現有的介面轉換成另一個符合特定邏輯的介面。
+這些轉接器本身並不負責底層的記憶體管理，而是包裝了現有的序列容器（如 deque 或 vector）。
+```cpp
+#include <stack>
+#include <queue>
+using namespace std;
+
+int main() {
+    // 1. Stack
+    stack<int> s; 
+    s.push(1); s.push(2); 
+    int t = s.top(); // t = 2
+
+    // 2. Queue
+    queue<int> q; 
+    q.push(1); q.push(2); 
+    int f = q.front(); // f = 1
+
+    // 3. Priority Queue
+    priority_queue<int> pq; 
+    pq.push(3); pq.push(7); 
+    int m = pq.top(); // m = 7
+
     return 0;
 }
 ```
