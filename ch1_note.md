@@ -609,4 +609,25 @@ STL四大元件：
 > **預設**選擇為`vector`，快取區域性 (Cache locality) 勝過理論上的複雜度。
 
 ### Associative Container(關聯性容器)
+依資料結構分為兩大類：
+* Ordered(有序：基於樹結構)：`set<T>`與`map<K, V>`內部維持**嚴格遞增**底層實作是紅黑樹 (red-black tree)，這確保了搜尋、插入與刪除在最壞情況下都具備 $O(\log n)$ 
+* Unordered(無序：基於雜湊表)：`unordered_set<T>`與`unordered_map<K, V>`內部無序。它們犧牲了順序性，換取了平均 $O(1)$ 的搜尋與插入時間 (average $O(1)$)。
+> [!NOTE]
+> 字首帶有 multi- 的版本，如 multiset，則允許集合內存在重複的元素。
 
+```cpp
+#include <map>
+#include <unordered_map>
+#include <string>
+
+using namespace std;
+
+int main() {
+    map<string, int>           phone;      // 內部是有序的紅黑樹結構
+    unordered_map<string, int> phone_fast; // 內部是無序的雜湊表結構
+    
+    phone["Alice"] = 1234;                 // O(log n) 的插入操作
+    
+    return 0;
+}
+```
