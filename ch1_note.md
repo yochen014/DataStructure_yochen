@@ -562,3 +562,51 @@ class Good {
     // 複製/移動/銷毀：全部由編譯器自動生成
 };
 ```
+
+### 記憶體管理--Smart Pointers(智慧型指標)
+使用原始指標與 `new/delete` 來管理動態記憶體，這非常容易因為忘記釋放或執行期錯誤而導致記憶體外洩。智慧型指標則是將 RAII（資源獲取即初始化）的公理完美封裝的類別。
+```cpp
+#include <memory>
+using namespace std;
+
+// 1. unique_ptr
+unique_ptr<Shape> s1 = make_unique<Circle>(3.0); 
+
+// 2. shared_ptr
+shared_ptr<Shape> s2 = make_shared<Square>(4.0);
+auto s3 = s2; 
+
+// 3. weak_ptr
+weak_ptr<Shape> w = s2;
+```
+其中，
+>* `unique_ptr`獨佔存取權：一塊記憶體同時只能被一個指標存取；
+> 離開其作用域 (scope exit) 時，底層的記憶體會被自動刪除 (auto-deleted)。
+
+>* `shared_ptr`多對一參考計數：多個獨立的擁有者 (many independent owners) **共享**同一塊記憶體 (shared)。
+> 當你將 s2 賦值給 s3 (`auto s3 = s2;`) 時，內部的計數器會嚴格遞增 (ref-count++)。只有當最後一個指向該記憶體的 shared_ptr 被銷毀 (drops it) 且計數器歸零時，記憶體才會被真正刪除。
+
+>* `weak_ptr`觀察者：不擁有任何資源。可以觀察`shared_ptr`管理的物件，但**不增加參考計數**。
+> 圖論中的有向圖或雙向鏈結串列時極為關鍵。如果兩個節點透過 `shared_ptr` 互相指向對方，就會形成「循環依賴」，導致參考計數永遠無法歸零，造成記憶體外洩。
+>
+
+## STL(標準模板庫Standard Templates Library)
+STL四大元件：
+* **Container(容器)**：負責儲存資料的結構
+* **Iterator(迭代器)**：指向容器內部的指標，它是連接容器與演算法的橋樑
+* **Algorithm(演算法)**：透過迭代器來對資料進行運作
+* **Function Objects(函數物件)**：用來自訂演算法的特定行為
+
+> [!CAUTION]
+> 任何演算法只要搭配相容的迭代器，就能在任何容器上完美運作。這就像是定義了一組廣義的線性算子，只要空間的基底滿足特定條件，該算子就能直接套用。
+
+### Sequence Container(序列容器)
+* `vector<T>`：動態陣列(dynamic array)。 $O(1)$ 的隨機存取；與分攤提後的 $O(1)$ 尾端插入 (amortized push_back)。
+* `array<T, N>`：固定大小的陣列 (fixed-size array)。配置於**堆疊區 (stack-allocated)**，因此具備**零額外開銷 (no overhead)** 的特性。
+* `deque<T>`：分段陣列(segemented array)，其優勢在於支援兩端皆為 $O(1)$ 的推入操作。
+* `list<T>`與`forward_list<T>`：分別為雙向與單向鏈結串列 (doubly-linked list / singly-linked list)。只要給特定的迭代器，能在 $O(1)$ 的時間內完成插入與刪除
+> [!TIP]
+> **預設**選擇為`vector`，快取區域性 (Cache locality) 勝過理論上的複雜度。
+
+### Associative Container(關聯性容器)
+
