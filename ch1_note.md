@@ -627,7 +627,6 @@ int main() {
     unordered_map<string, int> phone_fast; // 內部是無序的雜湊表結構
     
     phone["Alice"] = 1234;                 // O(log n) 的插入操作
-    
     return 0;
 }
 ```
