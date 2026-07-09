@@ -687,11 +687,24 @@ int main() {
 ### Iterators(迭代器)
 想像成 **「書籤」** 或 **「指向資料的指標」**：它會記錄目前所在的位置，並提供方法（如 next()）讓你移動到下一個資料，而不需要把整個資料庫一次性搬進記憶體。
 STL 裡面大多容器都採用 iterator 的方式去存取，如 vector, set, map 等等。
-演算法會根據其運算邏輯，指定它所需的最低迭代器等級：
-> * Input / Output (輸入輸出迭代器)：
-> `*it`:取出目前位置元素
-> `++it`:移動到下一個元素
-> `it1 == it2`:比較兩個迭代器是否指向同個地方
+> [!NOTE]
+>  **演算法會根據其運算邏輯，指定它所需的最低迭代器等級(越下面越強)：**
+
+> * **Input / Output (輸入輸出迭代器)：**
+> `*it`:取出目前位置元素 (I/O)
+> `++it`:移動到下一個元素 (I/O)
+> `it1 == it2`:比較兩個迭代器是否指向同個地方 (I)
+> * **Foward Iterator(前向迭代器)：**
+> 具備 input 的所有操作，且允許多次遍歷 (multi-pass)。通常對應到單向鏈結串列。
+> * **Bidirectional(雙向迭代器)：**
+> 具備 forward 的所有操作，並增加了反向移動的能力 `--it`
+> 例如：`list`, `map`, `set`
+> * **Random Access(隨機存取迭代器)：**
+> 具有bidirectional的所有操作，並允許以 $O(1)$ 時間跳躍 `it+n`、索引存取 `it[n]`、比較大小`<`。
+> 例如：`vector`, `array`, `deque`。
+> * **Contiguous, C++17(連續迭代器)：**
+> 在隨機存取的基礎上，保證了元素在記憶體連續。
+> 例如：`vector`, `array`, `string`。
 
 ---
 語法：
@@ -721,3 +734,58 @@ int main() {
 > [!NOTE]
 > **為何不用Pointer就好?**
 > 因為Pointer受限於「連續記憶體」，若遇到`list`, `map`, `unordered_set`非連續容器，無法表示位置。
+
+> [!IMPORTANT]
+> `auto`為現代寫法。負責**自動偵測型別**，但 **「型別仍然不可改」**
+```cpp
+int main() {
+    vector<int> v = {3, 1, 4, 1, 5};
+
+    // 不使用 auto 的傳統寫法：型別名稱極度冗長
+    for (vector<int>::iterator it = v.begin(); it != v.end(); ++it)
+        cout << *it << ' ';
+
+    // 使用 auto 的現代寫法：編譯器自動推導出 it 就是 vector<int>::iterator
+    for (auto it = v.begin(); it != v.end(); ++it)
+        cout << *it << ' ';
+    
+    // 使用auto且傳址(不須再複製一份)，遍歷 (Range-based for)
+    for (auto& x : v)
+        cout << x << ' ';
+    
+    for_each(v.begin(), v.end(), [](int x)){ // (algorithm-based) x類似python中的lambda
+        cout << x << ' ';
+    });
+}
+```
+
+> [!IMPORTANT]
+> **STL 所有演算法的通用約定：半開區間**
+> $[\text{begin()}, \text{end()})$
+>
+> `begin()`指向容器的第一個元素
+> `end()`指向最後一個元素的下一個位置。
+> 區間的長度永遠可以直接由 end - begin 計算得出
+
+### Complexity Guarantees — Mandated by the Standard
+
+| Operation | `vector` | `list` | `set` / `map` | `unordered_map` |
+|-----------|---------|--------|---------------|------------------|
+| Random access `[i]` | **O(1)** | — | — | — |
+| Insert at end       | O(1) amort. | O(1) | O(log n) | O(1) avg |
+| Insert at front     | O(n) | O(1) | O(log n) | O(1) avg |
+| Insert in middle    | O(n) | O(1) given iter | O(log n) | O(1) avg |
+| Erase               | O(n) | O(1) given iter | O(log n) | O(1) avg |
+| Find                | O(n) | O(n) | **O(log n)** | **O(1) avg** |
+| Memory overhead     | low  | high (2 ptrs/node) | high (3 ptrs+color/node) | medium |
+
+> **The standard contractually guarantees these complexities.** Pick your container by the operations you do most.
+
+---
+
+## Design Patterns(設計模式)
+設計模式想像成程式設計領域中的「定理」或「公理結構」。它不是可以直接呼叫的函式庫或單純的程式碼片段，而是針對反覆出現的問題，所提出的一套解決方案。
+有23個設計模式依照**GoF(Gang of Four)**設計模式被分為三類：
+> * Creational(創建型)：專注於物件的生成機制 (How objects are made)。
+> * Structural(結構型)：探討類別與物件之間如何組合 (How classes/objects are composed)。
+> * Behavioral(行為型)：
