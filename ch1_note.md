@@ -423,6 +423,7 @@ virtual ~Shape() {}; //舊版cpp 的虛擬建構子
 > [!TIP]
 > 註解：`virtual` 允許子類別覆寫(override)這個函數；`const`承諾此函數`area()`不修改物件內部變數。；`=0`為「純虛擬函數」之註記，代表父類別不實作。
 > 若只有`constant`、沒有`=0`，則就要在父類別(以Shape為例)實作
+---
 
 ### 多型(Polymorphism)與模板(Templates)
 * Compile-time / **Static** Polymorphism（編譯期多型/靜態多型）<br>
@@ -510,6 +511,8 @@ virtual ~Shape() {}; //舊版cpp 的虛擬建構子
     ```
     `Vec2 operator+` 重新定義了加法(就如同向量空間中的加法也要被重新定義一樣)
 
+---
+
 ### Friend function(朋友函數)
 今天一個 function 若宣告為 friend 是告訴來引用此類別的人說，我們提供一個公開的方法(規格)，且能夠讓你去存取 private member。但要做什麼，需要你自己來實作。
 必須**call by reference**。
@@ -533,6 +536,8 @@ cout << a + b * 2.0;  // (7,10)
 > 
 > 結論：`friend`可**允許外部函數去存取**`private`變數，要謹慎用。
 >
+---
+
 ### 記憶體管理法則(Zero / Three / Five)
 The Rule of Zero / Three / Five
 
@@ -562,6 +567,7 @@ class Good {
     // 複製/移動/銷毀：全部由編譯器自動生成
 };
 ```
+---
 
 ### 記憶體管理--Smart Pointers(智慧型指標)
 使用原始指標與 `new/delete` 來管理動態記憶體，這非常容易因為忘記釋放或執行期錯誤而導致記憶體外洩。智慧型指標則是將 RAII（資源獲取即初始化）的公理完美封裝的類別。
@@ -590,6 +596,8 @@ weak_ptr<Shape> w = s2;
 > 圖論中的有向圖或雙向鏈結串列時極為關鍵。如果兩個節點透過 `shared_ptr` 互相指向對方，就會形成「循環依賴」，導致參考計數永遠無法歸零，造成記憶體外洩。
 >
 
+---
+
 ## STL(標準模板庫Standard Templates Library)
 STL四大元件：
 * **Container(容器)**：負責儲存資料的結構
@@ -599,6 +607,7 @@ STL四大元件：
 
 > [!CAUTION]
 > 任何演算法只要搭配相容的迭代器，就能在任何容器上完美運作。這就像是定義了一組廣義的線性算子，只要空間的基底滿足特定條件，該算子就能直接套用。
+---
 
 ### Sequence Container(序列容器)
 * `vector<T>`：動態陣列(dynamic array)。 $O(1)$ 的隨機存取；與分攤提後的 $O(1)$ 尾端插入 (amortized push_back)。
@@ -607,6 +616,8 @@ STL四大元件：
 * `list<T>`與`forward_list<T>`：分別為雙向與單向鏈結串列 (doubly-linked list / singly-linked list)。只要給特定的迭代器，能在 $O(1)$ 的時間內完成插入與刪除
 > [!TIP]
 > **預設**選擇為`vector`，快取區域性 (Cache locality) 勝過理論上的複雜度。
+
+---
 
 ### Associative Container(關聯性容器)
 依資料結構分為兩大類：
@@ -630,8 +641,10 @@ int main() {
 }
 ```
 
+---
+
 ### Container Adapters(容器轉接器)
-設計模式中，**轉接器模式 (Adapter Pattern)**的核心思想是將一個現有的介面轉換成另一個符合特定邏輯的介面。
+設計模式中，**轉接器模式 (Adapter Pattern)** 的核心思想是將一個現有的介面轉換成另一個符合特定邏輯的介面。
 這些轉接器本身並不負責底層的記憶體管理，而是包裝了現有的序列容器（如 deque 或 vector）。
 ```cpp
 #include <stack>
@@ -657,3 +670,54 @@ int main() {
     return 0;
 }
 ```
+> * `stack`(堆疊)：**LIFO(後進先出)**，所有的插入與刪除都只能在同一個端點（Top）進行。
+> 優先使用`deque<T>` (雙向佇列)底層實作。
+> 它將 deque 原本允許兩端操作的介面封閉起來，只暴露出 `push()`、`pop()` 與 `top()`。
+
+> * `queue<T>`(佇列)：**FIFO(先進先出)**，元素從一端進入，從另一端依序離開。
+> 優先使用`deque<T>` 底層實作。
+> 它封裝了 deque，並限定只能透過 `push()` 在尾端加入元素，並透過 `front()` 與 `pop()` 在首端讀取與移除元素。
+
+> * `priority_queue<T>`(優先權佇列)：**Heap(堆積)**。不再是單純的線性時間順序，而是一種偏序關係 (Partial order)。是一個 **Max Heap (最大堆積)**，保證樹根節點永遠是集合中的**最大值**。
+> 優先使用`vector<T>` 底層實作。
+> 因為 Heap 演算法（如向上/向下調整）在邏輯上是一棵完滿二元樹，但在實體記憶體是透過**index搜索**來找父節點，`vector`提供連續記憶體與 $O(1)$ 隨機存取。
+
+---
+
+### Iterators(迭代器)
+想像成 **「書籤」** 或 **「指向資料的指標」**：它會記錄目前所在的位置，並提供方法（如 next()）讓你移動到下一個資料，而不需要把整個資料庫一次性搬進記憶體。
+STL 裡面大多容器都採用 iterator 的方式去存取，如 vector, set, map 等等。
+演算法會根據其運算邏輯，指定它所需的最低迭代器等級：
+> * Input / Output (輸入輸出迭代器)：
+> `*it`:取出目前位置元素
+> `++it`:移動到下一個元素
+> `it1 == it2`:比較兩個迭代器是否指向同個地方
+
+---
+語法：
+```cpp
+<type>::iterator it;
+```
+`<type>`為迭代器的容器型態
+`it`為迭代器名稱，可自定義。
+範例：
+```cpp
+int main() {
+    vector<int> numbers = {10, 20, 30, 40, 50};
+
+    vector<int>::iterator it; //宣告迭代器 it
+
+    // 用 iterator 逐一走訪 vector
+    for (it = numbers.begin(); it != numbers.end(); ++it) {
+        // ++it 表示向容器右方走一個單位
+        cout << *it << " ";
+    }
+    cout << endl;
+    return 0;
+}
+
+```
+
+> [!NOTE]
+> **為何不用Pointer就好?**
+> 因為Pointer受限於「連續記憶體」，若遇到`list`, `map`, `unordered_set`非連續容器，無法表示位置。
