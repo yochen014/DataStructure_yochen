@@ -670,17 +670,17 @@ int main() {
     return 0;
 }
 ```
-> * `stack`(堆疊)：**LIFO(後進先出)**，所有的插入與刪除都只能在同一個端點（Top）進行。
-> 優先使用`deque<T>` (雙向佇列)底層實作。
-> 它將 deque 原本允許兩端操作的介面封閉起來，只暴露出 `push()`、`pop()` 與 `top()`。
+* `stack`(堆疊)：**LIFO(後進先出)**，所有的插入與刪除都只能在同一個端點（Top）進行。
+優先使用`deque<T>` (雙向佇列)底層實作。
+它將 deque 原本允許兩端操作的介面封閉起來，只暴露出 `push()`、`pop()` 與 `top()`。
 
-> * `queue<T>`(佇列)：**FIFO(先進先出)**，元素從一端進入，從另一端依序離開。
-> 優先使用`deque<T>` 底層實作。
-> 它封裝了 deque，並限定只能透過 `push()` 在尾端加入元素，並透過 `front()` 與 `pop()` 在首端讀取與移除元素。
+* `queue<T>`(佇列)：**FIFO(先進先出)**，元素從一端進入，從另一端依序離開。
+優先使用`deque<T>` 底層實作。
+它封裝了 deque，並限定只能透過 `push()` 在尾端加入元素，並透過 `front()` 與 `pop()` 在首端讀取與移除元素。
 
-> * `priority_queue<T>`(優先權佇列)：**Heap(堆積)**。不再是單純的線性時間順序，而是一種偏序關係 (Partial order)。是一個 **Max Heap (最大堆積)**，保證樹根節點永遠是集合中的**最大值**。
-> 優先使用`vector<T>` 底層實作。
-> 因為 Heap 演算法（如向上/向下調整）在邏輯上是一棵完滿二元樹，但在實體記憶體是透過**index搜索**來找父節點，`vector`提供連續記憶體與 $O(1)$ 隨機存取。
+* `priority_queue<T>`(優先權佇列)：**Heap(堆積)**。不再是單純的線性時間順序，而是一種偏序關係 (Partial order)。是一個 **Max Heap (最大堆積)**，保證樹根節點永遠是集合中的**最大值**。
+優先使用`vector<T>` 底層實作。
+因為 Heap 演算法（如向上/向下調整）在邏輯上是一棵完滿二元樹，但在實體記憶體是透過**index搜索**來找父節點，`vector`提供連續記憶體與 $O(1)$ 隨機存取。
 
 ---
 
@@ -690,21 +690,21 @@ STL 裡面大多容器都採用 iterator 的方式去存取，如 vector, set, m
 > [!NOTE]
 >  **演算法會根據其運算邏輯，指定它所需的最低迭代器等級(越下面越強)：**
 
-> * **Input / Output (輸入輸出迭代器)：**
-> `*it`:取出目前位置元素 (I/O)
-> `++it`:移動到下一個元素 (I/O)
-> `it1 == it2`:比較兩個迭代器是否指向同個地方 (I)
-> * **Foward Iterator(前向迭代器)：**
-> 具備 input 的所有操作，且允許多次遍歷 (multi-pass)。通常對應到單向鏈結串列。
-> * **Bidirectional(雙向迭代器)：**
-> 具備 forward 的所有操作，並增加了反向移動的能力 `--it`
-> 例如：`list`, `map`, `set`
-> * **Random Access(隨機存取迭代器)：**
-> 具有bidirectional的所有操作，並允許以 $O(1)$ 時間跳躍 `it+n`、索引存取 `it[n]`、比較大小`<`。
-> 例如：`vector`, `array`, `deque`。
-> * **Contiguous, C++17(連續迭代器)：**
-> 在隨機存取的基礎上，保證了元素在記憶體連續。
-> 例如：`vector`, `array`, `string`。
+* **Input / Output (輸入輸出迭代器)：**
+`*it`:取出目前位置元素 (I/O)
+`++it`:移動到下一個元素 (I/O)
+`it1 == it2`:比較兩個迭代器是否指向同個地方 (I)
+* **Foward Iterator(前向迭代器)：**
+具備 input 的所有操作，且允許多次遍歷 (multi-pass)。通常對應到單向鏈結串列。
+* **Bidirectional(雙向迭代器)：**
+具備 forward 的所有操作，並增加了反向移動的能力 `--it`
+例如：`list`, `map`, `set`
+* **Random Access(隨機存取迭代器)：**
+具有bidirectional的所有操作，並允許以 $O(1)$ 時間跳躍 `it+n`、索引存取 `it[n]`、比較大小`<`。
+例如：`vector`, `array`, `deque`。
+* **Contiguous, C++17(連續迭代器)：**
+在隨機存取的基礎上，保證了元素在記憶體連續。
+例如：`vector`, `array`, `string`。
 
 ---
 語法：
@@ -786,6 +786,6 @@ int main() {
 ## Design Patterns(設計模式)
 設計模式想像成程式設計領域中的「定理」或「公理結構」。它不是可以直接呼叫的函式庫或單純的程式碼片段，而是針對反覆出現的問題，所提出的一套解決方案。
 有23個設計模式依照**GoF(Gang of Four)**設計模式被分為三類：
-> * Creational(創建型)：專注於物件的生成機制 (How objects are made)。
-> * Structural(結構型)：探討類別與物件之間如何組合 (How classes/objects are composed)。
-> * Behavioral(行為型)：
+* Creational(創建型)：專注於物件的生成機制 (How objects are made)。
+* Structural(結構型)：探討類別與物件之間如何組合 (How classes/objects are composed)。
+* Behavioral(行為型)：
