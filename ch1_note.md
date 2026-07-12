@@ -786,6 +786,117 @@ int main() {
 ## Design Patterns(設計模式)
 設計模式想像成程式設計領域中的「定理」或「公理結構」。它不是可以直接呼叫的函式庫或單純的程式碼片段，而是針對反覆出現的問題，所提出的一套解決方案。
 有23個設計模式依照**GoF(Gang of Four)**設計模式被分為三類：
-* Creational(創建型)：專注於物件的生成機制 (How objects are made)。
-* Structural(結構型)：探討類別與物件之間如何組合 (How classes/objects are composed)。
-* Behavioral(行為型)：
+* **Creational(創建型)**：專注於物件的生成機制 (How objects are made)。
+* **Structural(結構型)**：探討類別與物件之間如何組合 (How classes/objects are composed)。
+* **Behavioral(行為型)**：定義物件之間的責任分配與控制流程 (How responsibilities & control flow are distributed)。
+
+### Iterator Pattern(迭代器模式)
+提供一種方法來循序存取聚合體（集合）內的元素，而完全不需要暴露該集合底層的記憶體配置或資料結構，
+也是C++, Java, Python語言本身特性。
+`vector`, `list`, `set`都可以透過統一介面`c.begin()`, `c.end()`套用同樣的演算法。
+
+### Strategy Pattern(策略模式)
+定義一族演算法，將每一個演算法嚴密地封裝起來，並讓它們之間可以互相替換 (interchangeable)。
+例子：`sort`可以在不修改排序演算法的情況下，隨意抽換第三個參數。傳入`greater<int>{}`變成遞減排序，或是傳入Lambda函數 `[](int a, int b){...}`
+```cpp
+sort(v.begin(), v.end());                       // default (less)
+sort(v.begin(), v.end(), greater<int>{});       // strategy 1
+sort(v.begin(), v.end(),
+          [](int a, int b){ return abs(a-3) < abs(b-3); });
+```
+
+### Factory Method(工廠方法模式)
+定義一個用來建立**物件**的介面，但將實際決定要實例化哪一個類別的權力，交由子類別或特定的函數來決定。
+```cpp
+class Shape { public: virtual double area() const = 0;
+              virtual ~Shape() = default; };
+
+class Circle : public Shape { /* … */ };
+class Square : public Shape { /* … */ };
+
+unique_ptr<Shape> make_shape(const string& kind) { //用智慧型指標，不用手動delete
+    if (kind == "circle") return make_unique<Circle>(1.0);
+    if (kind == "square") return make_unique<Square>(1.0);
+    throw invalid_argument("unknown shape: " + kind);
+}
+
+auto s = make_shape("circle");      // client knows nothing about Circle
+```
+
+### Singleton Pattern(單例模式)
+確保一個類別在系統的生命週期中「只有一個實例 (only one instance)」，並提供一個全域存取點。
+```cpp
+class Logger {
+public:
+    static Logger& instance() {              // Meyers' Singleton
+        static Logger inst;                  // thread-safe since C++11
+        return inst;
+    }
+    void log(const std::string& msg)         { /* ... */ }
+
+    Logger(const Logger&)            = delete;
+    Logger& operator=(const Logger&) = delete;
+private:
+    Logger() = default;
+};
+
+Logger::instance().log("hello");
+```
+
+### Observer Pattern(觀察者模式)
+建立一種一對多的依賴關係。當主體 (Subject) 的狀態發生改變時，所有依賴它的觀察者 (Observers) 都會自動收到通知 (notified automatically)。
+```cpp
+class Observer { public: virtual void on_event(int v) = 0;
+                 virtual ~Observer() = default; };
+
+class Subject {
+    vector<Observer*> observers_;
+    int state_ = 0;
+public:
+    void attach(Observer* o)        { observers_.push_back(o); }
+    void set_state(int s) {
+        state_ = s;
+        for (auto* o : observers_) o->on_event(s);   // notify all
+    }
+};
+```
+> 註解：定義一個介面`Observer`，包含虛擬函數`on_event()`。
+> 主體`Subject`內部維護一個**儲存觀察者指標的陣列** `vector<Observer*> observers_;`
+> 當主體狀態改變`set_state(int s)`，透過迴圈遍歷該陣列，呼叫每個觀察者的`on_events(s)`。
+
+> [!CAUTION]
+> 若使用`shared_ptr`，容易造成循環參照，會有生命週期與記憶體管理上的bugs。
+> 應改用`weak_ptr`。
+
+### Composite Pattern(組合模式)
+將物件組合成「樹狀結構 (tree structures)」，以表達「部分-整體 (part-whole)」的階層體系。它的威力在於讓客戶端能以完全統一的方式 (uniformly)，來操作單一物件或整個組合體。
+```cpp
+class FSNode {
+public:
+    virtual size_t size() const = 0;
+    virtual ~FSNode() = default;
+};
+
+class File : public FSNode {
+    size_t bytes_;
+public:
+    File(size_t b) : bytes_(b) {}
+    size_t size() const override { return bytes_; }
+};
+
+class Directory : public FSNode {
+    std::vector<std::unique_ptr<FSNode>> children_;
+public:
+    void add(std::unique_ptr<FSNode> n) { children_.push_back(std::move(n)); }
+    size_t size() const override {
+        size_t s = 0;
+        for (auto& c : children_) s += c->size();   // works for files AND dirs
+        return s;
+    }
+};
+```
+
+### Adapter Pattern(轉接器模式)
+將一個類別的現有介面，轉換成另一個客戶端所期望的介面 (Convert the interface ... into another interface clients expect)。
+> [!NOTE]
+> STL的應用：前面提到的 `stack` 與 `queue` 就是完美的轉接器實例。它們將底層容器 (如 `deque`) 的寬廣介面，轉接並限制為嚴格的 LIFO/FIFO 操作合約。
