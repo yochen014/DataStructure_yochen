@@ -119,7 +119,7 @@ Sparse transposeSlow(const Sparse& A) {
 \[T(i) = T(i-1) + S(i-1)\]
 有了 $T$ 陣列，我們只需要遍歷一次原陣列，就能以 $O(1)$ 的時間知道每個元素轉置後的確切位置並直接存入。
 > [!NOTE]
-> 嚴謹分析：計算 $S$ 耗時 $O(t)$，計算 $T$ 耗時 $O(n)$，搬移資料耗時 $O(t)$，整體時間複雜度大幅降至 $O(n+t)$。即便在最糟情況下（$t \approx nm$），它也等同於 $O(nm)$，完美達到了「既省空間又不犧牲效能」的境界。
+> 嚴謹分析：計算 $S$ 耗時 $O(t)$，計算 $T$ 耗時 $O(n)$，搬移資料耗時 $O(t)$，整體時間複雜度大幅降至 $\boldsymbol{O(n+t)}$。即便在最糟情況下（$t \approx nm$），它也等同於 $O(nm)$，完美達到了「既省空間又不犧牲效能」的境界。
 
 ```cpp
 using Sparse = std::vector<std::array<int,3>>;
@@ -141,9 +141,18 @@ Sparse fastTranspose(const Sparse& A) {
     for (int i = 1; i <= t; ++i) {                 // move each element once
         int j = A[i][1];                           // A的行 是 B的列
         B[T[j]] = {A[i][1], A[i][0], A[i][2]}; // B的列放 A的()
-        T[j]++;
+        T[j]++; //B的第j行 的 第一個擺放的位置 往後移 (指標)
     }
     return B;
 }
 ```
 
+### Matrix Multiplication(矩陣乘法)
+給定一個 $m\times n$ 的 A 和 $n\times p$ 的 B。
+$C=AB$
+\[C(i,j)=\sum_{k=1}^{n}A(i,k)\cdot B(k,j)\]
+這就導致了一個致命的存取不對稱性：  
+* 取得 $A(i,k)$ 非常快，因為 $A$ 中同一列（row $i$）的元素是連續排列的。  
+* 取得 $B(k,j)$ 非常慢，因為我們需要的是 $B$ 的同一行（column $j$），但在 3-Tuple 結構中，同一行的元素被分散在各個不同的列之中，**要找出它們必須掃描整個陣列 $B$。**
+
+解決方式：**提前轉置**
