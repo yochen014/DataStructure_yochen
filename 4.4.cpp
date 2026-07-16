@@ -44,15 +44,19 @@ PNode* padd(const PNode* p, const PNode* q){
 }
 
 //static 代表別的專案看不見這個函數
-static PNode* term(int c, int e, PNode* next){
+static PNode* term(int c, int e, PNode* next){ //輔助函數
     PNode* p = new PNode{c, e, next};
     return p;
 }
 
 //測試
 void demo44(){
-    PNode* A = term(3, 14, term(2, 8, term(1, 0, nullptr)));
-    PNode* B = term(8, 14, term(-3, 10, term(10, 6, nullptr)));
+    PNode* A = term(3, 14, term(2, 8, term(1, 0, nullptr))); // 3x^14 + 2x^8 + 1
+    PNode* B = term(8, 14, term(-3, 10, term(10, 6, nullptr))); // 8x^14 - 3x^10 + 10x^6
 
-    for(PNode* r = padd(A, B); r; r = r->link){}
+    for(PNode* r = padd(A, B); r; r = r->link){ //for (初始條件 ; 判斷條件 ; 步進操作)
+        //若 r == nullptr 迴圈會停止 。否則會一直跑下去，因為 r->link 會指向下一個節點，直到最後一個節點的 link 為 nullptr。
+        cout << r->coef << "x^" << r->exp << " + ";
+    }
+    cout << "\n";
 }
